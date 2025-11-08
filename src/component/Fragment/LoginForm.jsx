@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import InputForm from '../Element/Input/InputForm'
 import Button from '../Element/Button/Button'
 import { useNavigate } from 'react-router-dom'

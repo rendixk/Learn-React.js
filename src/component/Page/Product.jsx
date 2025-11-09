@@ -1,4 +1,4 @@
-import { Fragment, useState } from "react"
+import { Fragment, useEffect, useState } from "react"
 import { CardProduct } from "../Fragment/CardProduct"
 import Button from "../Element/Button/Button"
 import { useNavigate } from "react-router-dom"
@@ -33,12 +33,22 @@ export const ProductPage = () => {
 
     const navigate = useNavigate()
 
-    const [cart, setCart] = useState([
-        {
-            id: 1,
-            qty: 1
+    const [cart, setCart] = useState([])
+    const [totalPrice, setTotalPrice] = useState(0)
+    useEffect(() => {
+        setCart(JSON.parse(localStorage.getItem("cart")) || [])
+    }, [])
+
+    useEffect(() => {
+        if(cart.length > 0) {
+            const sum = cart.reduce((acc, item) => {
+                const product = products.find((product) => product.id === item.id)
+                return acc + product.price * item.qty
+            }, 0)
+            setTotalPrice(sum)
+            localStorage.setItem("cart", JSON.stringify(cart))
         }
-    ])
+    }, [cart])
 
     const handleLogout = () => {
         localStorage.removeItem("email")
@@ -56,6 +66,29 @@ export const ProductPage = () => {
         }
         else {
             setCart([...cart, { id: id, qty: 1 }])
+        }
+    }
+
+    const handleDeleteAll = () => {
+        if(cart.length === 0 || totalPrice === 0) {
+            console.log("Ga ada list ga bisa di delete anjeng")
+        }
+        else {
+            setCart([])
+            setTotalPrice(0)
+            console.log("Nah, kalau ada baru bisa. Mikir kids")
+        }
+    }
+
+    const deleteSpecial = () => {
+        if(cart.length === 0 || totalPrice === 0) {
+            console.log("Woi yang bener lah hapus nya, ngentod!!")
+        }
+        else {
+            setCart([])
+            setTotalPrice(0)
+            localStorage.removeItem("cart")
+            console.log("Mampus ygy ga bisa di cover, awoawkaowkawo")
         }
     }
 
@@ -93,7 +126,9 @@ export const ProductPage = () => {
                         </thead>
                         <tbody>
                             {cart.map((item) => {
-                                const product = products.find((product) => product.id === item.id)
+                                const product = products.find(
+                                    (product) => product.id === item.id
+                                )
                                 return (
                                     <tr key={item.id}>
                                         <td>{product.name}</td>
@@ -115,8 +150,26 @@ export const ProductPage = () => {
                                     </tr>
                                 )
                             })}
+                            <tr>
+                                <td colSpan={3}>
+                                    <b>Total Price</b>
+                                </td>
+                                <td>
+                                    <b>
+                                    Rp{" "}
+                                    {totalPrice.toLocaleString('id-ID', { 
+                                        styles: "currency", 
+                                        currency: "IDR",
+                                    })}
+                                    </b>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
+                    <div className="flex justify-center mt-5 space-x-5">
+                        <Button onClick={handleDeleteAll}>Delete All</Button>
+                        <Button onClick={deleteSpecial}>Delete YGY</Button>
+                    </div>
                 </div>
             </div>
         </Fragment>
